@@ -3,15 +3,16 @@ from schema import Course, Menu, RecipeStep
 from menu_theme_gpt_api_call import generate_menu
 from queries import get_similar_recipes
 from rezepte_api import get_recipe_steps_by_id
-# from time_for_steps_api_call import get_step_durations
+from time_for_steps_api_call import get_step_durations
+from order_of_steps_api_call import sort_steps
 
 BASE_URL = 'https://ecommerce-api.rewe.de/recipesearch/'
 
 if __name__ == '__main__':
     # Generate menu
 
-    theme = "ein olympia Menü"
-    number_of_courses = 5
+    theme = "ich will ein sommerliches Menü kochen"
+    number_of_courses = 4
     menu = generate_menu(theme, number_of_courses)
     print(menu)
 
@@ -38,7 +39,9 @@ if __name__ == '__main__':
 
 
     #get_step_durations()
-    
+
+    # menu_with_duration_of_steps = get_step_durations(menu)
+    # menu_with_sorted_steps = sort_steps(menu_with_duration_of_steps)
 
    # Ausgabe des aktualisierten Menüs
     for course in menu.courses:
