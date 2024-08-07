@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List
 
 class RecipeStep(BaseModel):
@@ -15,6 +15,15 @@ class Course(BaseModel):
     steps: List[RecipeStep] = []
     link: str = ""
 
+class CourseLLM(BaseModel):
+    name: str = Field(..., example="Vorspeise")
+    gericht: str = Field(..., example="Kürbissuppe")
+
+
 class Menu(BaseModel):
-    """Ein Menü, das aus mehreren Gängen besteht."""
-    courses: List[Course]
+    coursesllm: List[CourseLLM] = []
+    courses: List[Course] = []
+
+
+
+   
