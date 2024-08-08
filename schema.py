@@ -15,13 +15,8 @@ class Course(BaseModel):
     steps: List[RecipeStep] = []
     link: str = ""
 
-class CourseLLM(BaseModel):
-    name: str = Field(..., example="Vorspeise")
-    gericht: str = Field(..., example="Kürbissuppe")
-
 
 class Menu(BaseModel):
-    coursesllm: List[CourseLLM] = []
     courses: List[Course] = []
 
 

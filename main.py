@@ -1,4 +1,4 @@
-import json
+import json, time
 from schema import Course, Menu, RecipeStep
 from openai_api_calls import generate_menu, get_step_durations
 from queries import get_similar_recipes
@@ -10,42 +10,52 @@ BASE_URL = 'https://ecommerce-api.rewe.de/recipesearch/'
 if __name__ == '__main__':
     
     # Generate menu
+    start_time_llm_name = time.time()
+
     theme = "ich will ein sommerliches Menü kochen"
     number_of_courses = 4
-    courses_llm = generate_menu(theme, number_of_courses)
-
-    print(courses_llm)
-
-    menu = Menu(coursesllm=courses_llm)
-    print(menu)
+    menu = generate_menu(theme, number_of_courses)
     
+    print(f"Inaitial menu generation took {time.time() - start_time_llm_name} seconds")
+    print('generated menu',menu)
 
 
-    # # Füge ähnliche Rezepte und Schritte hinzu
-    # step_counter = 1 
-    # for course in menu.courses:
-    #     # Holen des ähnlichen Rezepts aus der Vektordatenbank
-    #     results = get_similar_recipes(course.llm_name)
-    #     similar_recipe = next(results, None)  # Holen des ersten (und einzigen) Ergebnisses
 
-    #     if similar_recipe:
-    #         course.id = str(similar_recipe["_id"])  # sicherstellen, dass es ein String ist
-    #         course.recipe_api_name = similar_recipe["title"]
+    # Get recipe info form REWE Rezepte API
+    start_time_get_recipe_info = time.time()
 
-    #         # Erstelle den Link
-    #         course.link = f'{BASE_URL}recipes/{course.id}'
+    step_counter = 1 
+    for course in menu.courses:
+        # Holen des ähnlichen Rezepts aus der Vektordatenbank
+        results = get_similar_recipes(course.llm_name)
+        similar_recipe = next(results, None)  # Holen des ersten (und einzigen) Ergebnisses
 
-    #         # Holen der Rezeptschritte anhand der Rezept-ID
-    #         steps = get_recipe_steps_by_id(course.id)
-    #         course.steps = [RecipeStep(step_number=step_counter + i, description=step["description"]) for i, step in enumerate(steps) if "description" in step]
-    #         step_counter += len(course.steps)  # Update den Schrittzähler
+        if similar_recipe:
+            # Get the recipe id and name
+            course.id = str(similar_recipe["_id"]) 
+            course.recipe_api_name = similar_recipe["title"]
 
+            # Create link
+            course.link = f'{BASE_URL}recipes/{course.id}'
 
-    #####################
-    # Quatsch loop durch das Menü um dann einzelne api calls zu machen
-    #####################
+            # Get the recipe steps
+            steps = get_recipe_steps_by_id(course.id)
+            course.steps = [RecipeStep(step_number=step_counter + i, description=step["description"]) for i, step in enumerate(steps) if "description" in step]
+            step_counter += len(course.steps)  # Update den Schrittzähler
 
-    # menu_with_duration_of_steps = get_step_durations(menu)
+    print(f"Getting recipe info took {time.time() - start_time_get_recipe_info} seconds")
+    print("Menü id, name, link und Rezept-Schritte", menu)
+
+    # convert all steps to a json object and print it
+    menu_dict = menu.dict()
+    # print(json.dumps(menu_dict, indent=2))
+
+    # Get step durations
+    start_time_get_steps_duration = time.time()
+
+    menu_with_duration_of_steps = get_step_durations(menu)
+    print(menu_with_duration_of_steps)
+
     # menu_with_sorted_steps = sort_steps(menu_with_duration_of_steps)
 
    # Ausgabe des aktualisierten Menüs
