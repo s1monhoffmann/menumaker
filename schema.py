@@ -7,6 +7,11 @@ class RecipeStep(BaseModel):
     description: str = ""
     duration: int = 0
 
+class SortedRecipeStep(BaseModel):
+    step_number: int
+    description: str
+    duration: int
+
 class Course(BaseModel):
     """Ein Gang in einem Menü"""
     id: str = ""

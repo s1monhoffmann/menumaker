@@ -1,9 +1,9 @@
 import json, time
 from schema import Course, Menu, RecipeStep
-from openai_api_calls import generate_menu, get_step_durations
+from openai_api_calls import generate_menu, get_step_durations, get_step_order
 from queries import get_similar_recipes
 from rezepte_api import get_recipe_steps_by_id
-from order_of_steps_api_call import sort_steps
+# from order_of_steps_api_call import sort_steps
 
 BASE_URL = 'https://ecommerce-api.rewe.de/recipesearch/'
 
@@ -55,20 +55,30 @@ if __name__ == '__main__':
 
     menu_with_duration_of_steps = get_step_durations(menu)
     print(menu_with_duration_of_steps)
+    print(f"Getting step durations took {time.time() - start_time_get_steps_duration} seconds")
 
-    # menu_with_sorted_steps = sort_steps(menu_with_duration_of_steps)
-
-   # Ausgabe des aktualisierten Menüs
-    # for course in menu.courses:
-    #     print(f"Course ID: {course.id}")
-    #     print(f"LLM Name: {course.llm_name}")
-    #     print(f"Recipe API Name: {course.recipe_api_name}")
-    #     print(f"Link: {course.link}")
-    #     print("Steps:")
-    #     for step in course.steps:
-    #         print(f"  {step.step_number}. {step.description}")
-    #     print()
+    # Sort steps returns List[SortedRecipeStep]
+    start_time_sort_steps = time.time()
+    sorted_steps  = get_step_order(menu_with_duration_of_steps)
+    
+    # Durchlaufe die Liste und drucke jedes Objekt
+    for step in sorted_steps:
+        print(f"Schritt {step.step_number}: {step.description} (Dauer: {step.duration} Minuten)")
+    print(f"Sorting steps took {time.time() - start_time_sort_steps} seconds")
 
     
-    # menu_dict = menu_with_duration_of_steps.dict()
-    # print(json.dumps(menu_dict, indent=2))
+
+#    #Ausgabe des aktualisierten Menüs
+#     for course in menu_with_sorted_steps.courses:
+#         print(f"Course ID: {course.id}")
+#         print(f"LLM Name: {course.llm_name}")
+#         print(f"Recipe API Name: {course.recipe_api_name}")
+#         print(f"Link: {course.link}")
+#         print("Steps:")
+#         for step in course.steps:
+#             print(f"  {step.step_number}. {step.description}")
+#         print()
+
+    
+    menu_dict = menu_with_duration_of_steps.dict()
+    print(json.dumps(menu_dict, indent=2))
